@@ -1,0 +1,192 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <title>Characters</title>
+    </head>
+    <body>
+        <div class="p-3 text-gray-900">
+            <div class="flex items-top justify-between">
+                <div>
+                    <h3
+                        id="title"
+                        class="text-3xl font-bold text-gray-900"
+                    ></h3>
+
+                    <h5 class="text-md font-semibold text-gray-900">
+                        By <span id="author"></span>
+                    </h5>
+                </div>
+
+                <div>
+                    <button
+                        class="py-2 px-4 bg-green-700 text-white rounded shadow hover:bg-green-800 active:bg-green-900"
+                        onclick="exportToFile()"
+                    >
+                        Export to file
+                    </button>
+                </div>
+            </div>
+
+            <div class="w-full mt-8">
+                <table class="w-full">
+                    <thead id="thead" class="sticky top-0 bg-white shadow-md"></thead>
+                    <tbody id="tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </body>
+
+    <script>
+        // Example settings
+        const settings = {
+            amountOfRows: 50,
+            textareaHeight: 3,
+            title: 'Sideways',
+            author: 'Rex Pickett - Alexander Payne - Jim Taylor',
+        };
+
+        // Example data
+        let data = {
+            'miles': {header: 'Miles', rows: []},
+            'jack': {header: 'Jack', rows: []},
+            'maya': {header: 'Maya', rows: []},
+            'stephanie': {header: 'Stephanie', rows: []},
+        };
+
+        const sanitizedFileName = () => {
+            return settings.title.replace(/[^\p{L}\p{N}]/giu, '').toLowerCase();
+        };
+
+        const exportToFile = () => {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(
+                new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+            );
+
+            // Format: `name-2024-11-18-10-12-23.json`
+            let fileName = sanitizedFileName();
+            fileName += `-${new Date().toJSON().slice(0,10)}`;
+            fileName += `-${new Date().toJSON().slice(11,19).replaceAll(':', '-')}`;
+            fileName += '.json';
+
+            a.setAttribute('download', fileName);
+
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+
+        const storeToLocalStorage = (event) => {
+            let value = event.target.value;
+            value = value === '' ? null : value;
+
+            data[event.target.dataset.name]['rows'][event.target.dataset.index] = value;
+
+            localStorage.setItem(sanitizedFileName(), JSON.stringify(data));
+        };
+
+        const thead = document.getElementById('thead');
+        const tbody = document.getElementById('tbody');
+
+        const initialValues = JSON.parse(localStorage.getItem(sanitizedFileName()) || '{}');
+
+        const initiate = () => {
+            // Set title
+            document.getElementById('title').innerText = settings.title;
+
+            // Set author
+            document.getElementById('author').innerText = settings.author;
+
+            // Create headers
+            createHeaders();
+
+            // Create rows & cells
+            createTbodyContent();
+        };
+
+        const createHeaders = () => {
+            const headerRow = document.createElement('tr');
+
+            let rowNumberCell = document.createElement('td');
+            headerRow.append(rowNumberCell);
+
+            for (let i = 0; i < Object.keys(data).length; i++) {
+                headerRow.append(createTh(i));
+
+                thead.append(headerRow);
+            }
+        };
+
+        const createTh = (index) => {
+            let th = document.createElement('th');
+
+            th.innerHTML = data[Object.keys(data)[index]].header;
+            th.className = 'py-2';
+
+            return th;
+        };
+
+        const createTbodyContent = () => {
+            for (let y = 0; y < settings.amountOfRows; y++) {
+                const row = document.createElement('tr');
+
+                row.append(createIndexTbodyCell(y));
+
+                for (let x = 0; x < Object.keys(data).length; x++) {
+                    let character = Object.keys(data)[x];
+
+                    let cellValue = initialValues?.[character]?.['rows'][y] || null;
+
+                    data[character]['rows'][y] = cellValue;
+
+                    let cell = createTd(y);
+                    cell.append(createTextarea(character, y, cellValue));
+                    row.append(cell);
+                }
+
+                tbody.append(row);
+            }
+        };
+
+        const createIndexTbodyCell = (index) => {
+            let rowNumberCell = document.createElement('td');
+            rowNumberCell.innerHTML = (index + 1).toString();
+
+            return rowNumberCell;
+        };
+
+        const createTd = (index) => {
+            let cell = document.createElement('td');
+            let cellClasses = ['h-auto'];
+
+            if (index === 0) {
+                cellClasses.push('pt-4');
+            }
+
+            cell.className = cellClasses.join(' ');
+
+            return cell;
+        };
+
+        const createTextarea = (character, index, value) => {
+            let textarea = document.createElement('textarea');
+
+            textarea.rows = settings.textareaHeight;
+            textarea.dataset.name = character;
+            textarea.dataset.index = index.toString();
+            textarea.className = 'border px-1 w-full mb-0';
+
+            textarea.value = value;
+
+            textarea.addEventListener('blur', storeToLocalStorage);
+
+            return textarea;
+        };
+
+        initiate();
+    </script>
+</html>
+
