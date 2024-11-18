@@ -36,10 +36,11 @@ const settings = {
 ```javascript
 // Example data
 let data = {
-    'miles': {header: 'Miles', rows: []},
-    'jack': {header: 'Jack', rows: []},
-    'maya': {header: 'Maya', rows: []},
-    'stephanie': {header: 'Stephanie', rows: []},
+    'john': {header: 'John', rows: []},
+    'jack': {header: 'Walter', rows: []},
+    'holly': {header: 'Holly', rows: []},
+    'tom': {header: 'Tom', rows: []},
+    'alice': {header: 'Alice', rows: []},
 };
 ```
 
