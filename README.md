@@ -37,7 +37,7 @@ const settings = {
 // Example data
 let data = {
     'john': {header: 'John', rows: []},
-    'jack': {header: 'Walter', rows: []},
+    'walter': {header: 'Walter', rows: []},
     'holly': {header: 'Holly', rows: []},
     'tom': {header: 'Tom', rows: []},
     'alice': {header: 'Alice', rows: []},
