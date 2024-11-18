@@ -44,19 +44,21 @@
         const settings = {
             amountOfRows: 50,
             textareaHeight: 3,
-            title: 'Sideways',
-            author: 'Rex Pickett - Alexander Payne - Jim Taylor',
+            title: 'My name is Alice',
+            author: 'Alice',
         };
 
         // Example data
         let data = {
-            'miles': {header: 'Miles', rows: []},
-            'jack': {header: 'Jack', rows: []},
-            'maya': {header: 'Maya', rows: []},
-            'stephanie': {header: 'Stephanie', rows: []},
+            'john': {header: 'John', rows: []},
+            'walter': {header: 'Walter', rows: []},
+            'holly': {header: 'Holly', rows: []},
+            'tom': {header: 'Tom', rows: []},
+            'alice': {header: 'Alice', rows: []},
         };
 
         const sanitizedFileName = () => {
+            console.log(settings.title.replace(/[^\p{L}\p{N}]/giu, '').toLowerCase())
             return settings.title.replace(/[^\p{L}\p{N}]/giu, '').toLowerCase();
         };
 
