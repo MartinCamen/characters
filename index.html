@@ -57,28 +57,27 @@
             'alice': {header: 'Alice', rows: []},
         };
 
-        const sanitizedFileName = () => {
-            console.log(settings.title.replace(/[^\p{L}\p{N}]/giu, '').toLowerCase())
+        const sanitizedTitle = () => {
             return settings.title.replace(/[^\p{L}\p{N}]/giu, '').toLowerCase();
         };
 
         const exportToFile = () => {
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(
+            const anchor = document.createElement('a');
+            anchor.href = URL.createObjectURL(
                 new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
             );
 
-            // Format: `name-2024-11-18-10-12-23.json`
-            let fileName = sanitizedFileName();
+            // Format: `{sanitized-title}-YYYY-MM-DD-HH-mm-ss.json`
+            let fileName = sanitizedTitle();
             fileName += `-${new Date().toJSON().slice(0,10)}`;
             fileName += `-${new Date().toJSON().slice(11,19).replaceAll(':', '-')}`;
             fileName += '.json';
 
-            a.setAttribute('download', fileName);
+            anchor.setAttribute('download', fileName);
 
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            document.body.appendChild(anchor);
+            anchor.click();
+            document.body.removeChild(anchor);
         };
 
         const storeToLocalStorage = (event) => {
@@ -87,13 +86,13 @@
 
             data[event.target.dataset.name]['rows'][event.target.dataset.index] = value;
 
-            localStorage.setItem(sanitizedFileName(), JSON.stringify(data));
+            localStorage.setItem(sanitizedTitle(), JSON.stringify(data));
         };
 
         const thead = document.getElementById('thead');
         const tbody = document.getElementById('tbody');
 
-        const initialValues = JSON.parse(localStorage.getItem(sanitizedFileName()) || '{}');
+        const initialValues = JSON.parse(localStorage.getItem(sanitizedTitle()) || '{}');
 
         const initiate = () => {
             // Set title
@@ -112,8 +111,8 @@
         const createHeaders = () => {
             const headerRow = document.createElement('tr');
 
-            let rowNumberCell = document.createElement('td');
-            headerRow.append(rowNumberCell);
+            // Empty header (for the row number cells)
+            headerRow.append(document.createElement('th'));
 
             for (let i = 0; i < Object.keys(data).length; i++) {
                 headerRow.append(createTh(i));
@@ -125,27 +124,26 @@
         const createTh = (index) => {
             let th = document.createElement('th');
 
-            th.innerHTML = data[Object.keys(data)[index]].header;
+            th.innerText = data[Object.keys(data)[index]].header;
             th.className = 'py-2';
 
             return th;
         };
 
         const createTbodyContent = () => {
-            for (let y = 0; y < settings.amountOfRows; y++) {
+            for (let index = 0; index < settings.amountOfRows; index++) {
                 const row = document.createElement('tr');
 
-                row.append(createIndexTbodyCell(y));
+                row.append(createRowNumberTbodyCell(index));
 
-                for (let x = 0; x < Object.keys(data).length; x++) {
-                    let character = Object.keys(data)[x];
+                for (let characterIndex = 0; characterIndex < Object.keys(data).length; characterIndex++) {
+                    let character = Object.keys(data)[characterIndex];
+                    let cellValue = initialValues?.[character]?.['rows'][index] || null;
+                    let cell = createTd(index);
 
-                    let cellValue = initialValues?.[character]?.['rows'][y] || null;
+                    data[character]['rows'][index] = cellValue;
 
-                    data[character]['rows'][y] = cellValue;
-
-                    let cell = createTd(y);
-                    cell.append(createTextarea(character, y, cellValue));
+                    cell.append(createTextarea(character, index, cellValue));
                     row.append(cell);
                 }
 
@@ -153,8 +151,9 @@
             }
         };
 
-        const createIndexTbodyCell = (index) => {
+        const createRowNumberTbodyCell = (index) => {
             let rowNumberCell = document.createElement('td');
+            // `+ 1` so we don't start at 0 (since some people seem to think that `1` is the first number...)
             rowNumberCell.innerHTML = (index + 1).toString();
 
             return rowNumberCell;
@@ -162,26 +161,29 @@
 
         const createTd = (index) => {
             let cell = document.createElement('td');
-            let cellClasses = ['h-auto'];
+            let cellClassNames = ['h-auto'];
 
             if (index === 0) {
-                cellClasses.push('pt-4');
+                // Add a little padding to the top so the thead doesn't overlap.
+                // It's all about the beautiful design, isn't it?
+                cellClassNames.push('pt-4');
             }
 
-            cell.className = cellClasses.join(' ');
+            cell.className = cellClassNames.join(' ');
 
             return cell;
         };
 
         const createTextarea = (character, index, value) => {
             let textarea = document.createElement('textarea');
-
-            textarea.rows = settings.textareaHeight;
-            textarea.dataset.name = character;
-            textarea.dataset.index = index.toString();
-            textarea.className = 'border px-1 w-full mb-0';
+            const indexAsString = index.toString();
 
             textarea.value = value;
+            textarea.name = `${character}-${indexAsString}`
+            textarea.className = 'border px-1 w-full mb-0';
+            textarea.rows = settings.textareaHeight;
+            textarea.dataset.name = character;
+            textarea.dataset.index = indexAsString;
 
             textarea.addEventListener('blur', storeToLocalStorage);
 
