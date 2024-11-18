@@ -42,6 +42,8 @@
     <script>
         // Example settings
         const settings = {
+            // Set a higher amount of rows if you need more rows.
+            // Be careful of changing it to a lower value, that might remove data upon saving...
             amountOfRows: 50,
             textareaHeight: 3,
             title: 'My name is Alice',
@@ -57,9 +59,8 @@
             'alice': {header: 'Alice', rows: []},
         };
 
-        const sanitizedTitle = () => {
-            return settings.title.replace(/[^\p{L}\p{N}]/giu, '').toLowerCase();
-        };
+        // `My name is Alice` => `mynameisalice`
+        const sanitizedTitle = () => settings.title.replace(/[^\p{L}\p{N}]/giu, '').toLowerCase();
 
         const exportToFile = () => {
             const anchor = document.createElement('a');
@@ -74,7 +75,6 @@
             fileName += '.json';
 
             anchor.setAttribute('download', fileName);
-
             document.body.appendChild(anchor);
             anchor.click();
             document.body.removeChild(anchor);
@@ -141,6 +141,7 @@
                     let cellValue = initialValues?.[character]?.['rows'][index] || null;
                     let cell = createTd(index);
 
+                    // Set data from (eventual) Local Storage value
                     data[character]['rows'][index] = cellValue;
 
                     cell.append(createTextarea(character, index, cellValue));
