@@ -2,6 +2,8 @@
 
 A super-duper simple table for character progress.
 
+![characters](https://github.com/user-attachments/assets/aadd4926-ad62-4e22-98ba-50b310292437)
+
 ### What's it for?
 I've used it for scenes and stories where multiple characters are interacting, and found that it's quite a neat way of organizing or presenting the order in which the events take place.
 
